@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QrIdRouteImport } from './routes/qr.$id'
 import { Route as NavigateIdRouteImport } from './routes/navigate.$id'
 import { Route as LocationIdRouteImport } from './routes/location.$id'
+import { Route as AdminQrRouteImport } from './routes/admin.qr'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
 import { Route as AdminIdEditRouteImport } from './routes/admin.$id.edit'
 
@@ -26,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QrIdRoute = QrIdRouteImport.update({
+  id: '/qr/$id',
+  path: '/qr/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NavigateIdRoute = NavigateIdRouteImport.update({
   id: '/navigate/$id',
   path: '/navigate/$id',
@@ -35,6 +42,11 @@ const LocationIdRoute = LocationIdRouteImport.update({
   id: '/location/$id',
   path: '/location/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminQrRoute = AdminQrRouteImport.update({
+  id: '/qr',
+  path: '/qr',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminNewRoute = AdminNewRouteImport.update({
   id: '/new',
@@ -51,16 +63,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/new': typeof AdminNewRoute
+  '/admin/qr': typeof AdminQrRoute
   '/location/$id': typeof LocationIdRoute
   '/navigate/$id': typeof NavigateIdRoute
+  '/qr/$id': typeof QrIdRoute
   '/admin/$id/edit': typeof AdminIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/new': typeof AdminNewRoute
+  '/admin/qr': typeof AdminQrRoute
   '/location/$id': typeof LocationIdRoute
   '/navigate/$id': typeof NavigateIdRoute
+  '/qr/$id': typeof QrIdRoute
   '/admin/$id/edit': typeof AdminIdEditRoute
 }
 export interface FileRoutesById {
@@ -68,8 +84,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/new': typeof AdminNewRoute
+  '/admin/qr': typeof AdminQrRoute
   '/location/$id': typeof LocationIdRoute
   '/navigate/$id': typeof NavigateIdRoute
+  '/qr/$id': typeof QrIdRoute
   '/admin/$id/edit': typeof AdminIdEditRoute
 }
 export interface FileRouteTypes {
@@ -78,24 +96,30 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/new'
+    | '/admin/qr'
     | '/location/$id'
     | '/navigate/$id'
+    | '/qr/$id'
     | '/admin/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/admin/new'
+    | '/admin/qr'
     | '/location/$id'
     | '/navigate/$id'
+    | '/qr/$id'
     | '/admin/$id/edit'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/admin/new'
+    | '/admin/qr'
     | '/location/$id'
     | '/navigate/$id'
+    | '/qr/$id'
     | '/admin/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -104,6 +128,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   LocationIdRoute: typeof LocationIdRoute
   NavigateIdRoute: typeof NavigateIdRoute
+  QrIdRoute: typeof QrIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +147,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/qr/$id': {
+      id: '/qr/$id'
+      path: '/qr/$id'
+      fullPath: '/qr/$id'
+      preLoaderRoute: typeof QrIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/navigate/$id': {
       id: '/navigate/$id'
       path: '/navigate/$id'
@@ -135,6 +167,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/location/$id'
       preLoaderRoute: typeof LocationIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/qr': {
+      id: '/admin/qr'
+      path: '/qr'
+      fullPath: '/admin/qr'
+      preLoaderRoute: typeof AdminQrRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/new': {
       id: '/admin/new'
@@ -155,11 +194,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminNewRoute: typeof AdminNewRoute
+  AdminQrRoute: typeof AdminQrRoute
   AdminIdEditRoute: typeof AdminIdEditRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminNewRoute: AdminNewRoute,
+  AdminQrRoute: AdminQrRoute,
   AdminIdEditRoute: AdminIdEditRoute,
 }
 
@@ -170,6 +211,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   LocationIdRoute: LocationIdRoute,
   NavigateIdRoute: NavigateIdRoute,
+  QrIdRoute: QrIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

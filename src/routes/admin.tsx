@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Edit3, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit3, Plus, QrCode, RotateCcw, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { deleteLocation, resetLocations, useLocations } from "@/lib/locations";
 import { toast } from "sonner";
@@ -33,12 +33,20 @@ function AdminPage() {
               {locations.length} place{locations.length === 1 ? "" : "s"}
             </p>
           </div>
-          <Link
-            to="/admin/new"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-hero px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant"
-          >
-            <Plus className="h-4 w-4" /> Add
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              to="/admin/qr"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-card hover:border-primary/30"
+            >
+              <QrCode className="h-4 w-4" /> QR
+            </Link>
+            <Link
+              to="/admin/new"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-hero px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant"
+            >
+              <Plus className="h-4 w-4" /> Add
+            </Link>
+          </div>
         </div>
 
         <div className="mt-5 space-y-2.5">

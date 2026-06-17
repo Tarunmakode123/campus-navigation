@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, MapPin, QrCode, ArrowRight } from "lucide-react";
+import { Search, MapPin, QrCode, ArrowRight, X } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { useLocations, CATEGORIES } from "@/lib/locations";
+import { clearEntryPoint, useEntryPoint } from "@/lib/entry-point";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const locations = useLocations();
+  const entryId = useEntryPoint();
+  const entry = locations.find((l) => l.id === entryId);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<string>("All");
 
@@ -77,6 +80,26 @@ function Home() {
       </section>
 
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6">
+        {entry && (
+          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
+              <MapPin className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                You are at
+              </div>
+              <div className="truncate text-sm font-semibold text-foreground">{entry.name}</div>
+            </div>
+            <button
+              onClick={() => clearEntryPoint()}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Clear entry point"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         <div className="-mx-4 mb-5 overflow-x-auto px-4">
           <div className="flex gap-2">
             {["All", ...CATEGORIES].map((c) => {
