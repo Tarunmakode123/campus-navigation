@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, MapPin, QrCode, ArrowRight } from "lucide-react";
+import { Search, MapPin, QrCode, ArrowRight, X } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { useLocations, CATEGORIES } from "@/lib/locations";
+import { clearEntryPoint, useEntryPoint } from "@/lib/entry-point";
 
 export const Route = createFileRoute("/")({
   head: () => ({
