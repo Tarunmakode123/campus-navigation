@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Edit3, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit3, Plus, QrCode, RotateCcw, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { deleteLocation, resetLocations, useLocations } from "@/lib/locations";
 import { toast } from "sonner";

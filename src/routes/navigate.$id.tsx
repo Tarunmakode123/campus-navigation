@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Footprints, MapPin, Navigation, Ruler, Play } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { useLocations } from "@/lib/locations";
+import { useEntryPoint } from "@/lib/entry-point";
 
 export const Route = createFileRoute("/navigate/$id")({
   head: () => ({
@@ -38,7 +39,9 @@ function NavigatePage() {
   const dest = all.find((l) => l.id === id);
   if (!dest) throw notFound();
 
-  const entry = all.find((l) => l.id === "main-gate") ?? all[0];
+  const entryId = useEntryPoint();
+  const entry =
+    all.find((l) => l.id === entryId) ?? all.find((l) => l.id === "main-gate") ?? all[0];
   const [pos, setPos] = useState<[number, number] | null>(
     entry?.latitude != null && entry?.longitude != null
       ? [entry.latitude, entry.longitude]
