@@ -1,12 +1,22 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Clock, MapPin, Navigation, Phone, Building2 } from "lucide-react";
+import type { ReactNode } from "react";
+import {
+  ArrowLeft,
+  BriefcaseBusiness,
+  Building2,
+  Clock,
+  MapPin,
+  Navigation,
+  Phone,
+  UserRound,
+} from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { getLocation, useLocations } from "@/lib/locations";
 
 export const Route = createFileRoute("/location/$id")({
   head: ({ params }) => {
     const loc = typeof window !== "undefined" ? getLocation(params.id) : undefined;
-    const title = loc ? `${loc.name} — Smart Navigator` : "Location — Smart Navigator";
+    const title = loc ? `${loc.name} - Smart Navigator` : "Location - Smart Navigator";
     return {
       meta: [
         { title },
@@ -51,15 +61,11 @@ function LocationPage() {
 
       <article className="mx-auto mt-4 max-w-3xl px-4">
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
-          <div className="relative h-48 w-full bg-gradient-hero sm:h-64">
+          <div className="relative h-52 w-full bg-gradient-hero sm:h-64">
             {loc.image && (
-              <img
-                src={loc.image}
-                alt={loc.name}
-                className="h-full w-full object-cover"
-              />
+              <img src={loc.image} alt={loc.name} className="h-full w-full object-cover" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
               <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-medium backdrop-blur">
                 {loc.category}
@@ -67,6 +73,7 @@ function LocationPage() {
               <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
                 {loc.name}
               </h1>
+              {loc.department && <p className="mt-1 text-sm opacity-85">{loc.department}</p>}
             </div>
           </div>
 
@@ -74,6 +81,23 @@ function LocationPage() {
             <p className="text-sm leading-relaxed text-muted-foreground">{loc.description}</p>
 
             <div className="grid gap-2 sm:grid-cols-2">
+              {loc.purpose && (
+                <InfoRow
+                  icon={<BriefcaseBusiness className="h-4 w-4" />}
+                  label="Work handled"
+                  value={loc.purpose}
+                />
+              )}
+              {loc.person && (
+                <InfoRow icon={<UserRound className="h-4 w-4" />} label="Meet" value={loc.person} />
+              )}
+              {loc.department && (
+                <InfoRow
+                  icon={<Building2 className="h-4 w-4" />}
+                  label="Department"
+                  value={loc.department}
+                />
+              )}
               {loc.floor && (
                 <InfoRow icon={<Building2 className="h-4 w-4" />} label="Floor" value={loc.floor} />
               )}
@@ -91,6 +115,16 @@ function LocationPage() {
                 />
               )}
             </div>
+
+            {loc.routeHint && (
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Navigation className="h-4 w-4 text-primary" />
+                  Route preview
+                </div>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{loc.routeHint}</p>
+              </div>
+            )}
 
             <Link
               to="/navigate/$id"
@@ -112,7 +146,7 @@ function InfoRow({
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {

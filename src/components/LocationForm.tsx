@@ -12,6 +12,13 @@ export function LocationForm({ initial }: { initial?: Location }) {
       name: "",
       description: "",
       category: "Academic",
+      purpose: "",
+      person: "",
+      department: "",
+      routeHint: "",
+      steps: [],
+      mapX: undefined,
+      mapY: undefined,
       floor: "",
       contact: "",
       hours: "",
@@ -51,6 +58,58 @@ export function LocationForm({ initial }: { initial?: Location }) {
           onChange={(e) => set("description", e.target.value)}
           className={`${inputCls} min-h-[88px] resize-y`}
           placeholder="Short description shown on the detail page"
+        />
+      </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Work / purpose">
+          <input
+            value={f.purpose ?? ""}
+            onChange={(e) => set("purpose", e.target.value)}
+            className={inputCls}
+            placeholder="Admission, fees, meet professor..."
+          />
+        </Field>
+        <Field label="Person to meet">
+          <input
+            value={f.person ?? ""}
+            onChange={(e) => set("person", e.target.value)}
+            className={inputCls}
+            placeholder="Dr. Sharma, Admin officer..."
+          />
+        </Field>
+        <Field label="Department">
+          <input
+            value={f.department ?? ""}
+            onChange={(e) => set("department", e.target.value)}
+            className={inputCls}
+            placeholder="Information Technology"
+          />
+        </Field>
+        <Field label="Route hint">
+          <input
+            value={f.routeHint ?? ""}
+            onChange={(e) => set("routeHint", e.target.value)}
+            className={inputCls}
+            placeholder="Turn right after Block A..."
+          />
+        </Field>
+      </div>
+
+      <Field label="Route steps">
+        <textarea
+          value={(f.steps ?? []).join("\n")}
+          onChange={(e) =>
+            set(
+              "steps",
+              e.target.value
+                .split("\n")
+                .map((step) => step.trim())
+                .filter(Boolean),
+            )
+          }
+          className={`${inputCls} min-h-[96px] resize-y`}
+          placeholder={"One step per line\nStart at Main Gate\nTurn right at Block A"}
         />
       </Field>
 
@@ -108,6 +167,32 @@ export function LocationForm({ initial }: { initial?: Location }) {
             value={f.longitude ?? ""}
             onChange={(e) =>
               set("longitude", e.target.value === "" ? undefined : Number(e.target.value))
+            }
+            className={inputCls}
+          />
+        </Field>
+        <Field label="Map X (0-100)">
+          <input
+            type="number"
+            step="any"
+            min={0}
+            max={100}
+            value={f.mapX ?? ""}
+            onChange={(e) =>
+              set("mapX", e.target.value === "" ? undefined : Number(e.target.value))
+            }
+            className={inputCls}
+          />
+        </Field>
+        <Field label="Map Y (0-100)">
+          <input
+            type="number"
+            step="any"
+            min={0}
+            max={100}
+            value={f.mapY ?? ""}
+            onChange={(e) =>
+              set("mapY", e.target.value === "" ? undefined : Number(e.target.value))
             }
             className={inputCls}
           />
