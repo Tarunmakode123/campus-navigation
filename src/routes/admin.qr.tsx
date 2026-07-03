@@ -14,6 +14,7 @@ function qrUrl(data: string, size = 320) {
 
 function QrCodesPage() {
   const locations = useLocations();
+  const entryLocations = locations.filter((loc) => loc.id === "main-gate");
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   return (
@@ -29,15 +30,15 @@ function QrCodesPage() {
         </Link>
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 pt-4">
+      <main className="mx-auto max-w-2xl px-4 pt-4">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 print:hidden">
           <div className="min-w-0">
             <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-              <QrCode className="h-6 w-6 text-primary" /> Entry QR codes
+              <QrCode className="h-6 w-6 text-primary" /> Main Gate QR code
             </h1>
             <p className="text-sm text-muted-foreground">
-              Print and place one at each entrance. Scanning opens the app with that place as
-              the starting point.
+              Print and place this at the Main Gate. Scanning opens the app with Main Gate as the
+              starting point.
             </p>
           </div>
           <button
@@ -48,26 +49,34 @@ function QrCodesPage() {
           </button>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 print:grid-cols-2">
-          {locations.map((loc) => {
+        <div className="mt-6 grid grid-cols-1 gap-4">
+          {entryLocations.map((loc) => {
             const target = `${origin}/qr/${loc.id}`;
             return (
               <div
                 key={loc.id}
-                className="flex flex-col items-center rounded-2xl border border-border bg-card p-5 text-center shadow-card print:break-inside-avoid print:shadow-none"
+                className="flex flex-col items-center rounded-2xl border border-border bg-card p-6 text-center shadow-card print:break-inside-avoid print:border-0 print:shadow-none"
               >
-                <div className="rounded-xl bg-white p-3 shadow-card">
+                <div className="rounded-xl bg-white p-4 shadow-card print:shadow-none">
                   <img
-                    src={qrUrl(target)}
+                    src={qrUrl(target, 520)}
                     alt={`QR code for ${loc.name}`}
-                    className="h-40 w-40"
+                    className="h-64 w-64"
                   />
                 </div>
-                <div className="mt-3 text-sm font-semibold">{loc.name}</div>
-                <div className="text-[11px] text-muted-foreground">{loc.category}</div>
+                <div className="mt-4 text-lg font-bold">{loc.name}</div>
+                <div className="text-sm text-muted-foreground">Scan here to start navigation</div>
                 <div className="mt-1 break-all text-[10px] text-muted-foreground/70 print:hidden">
                   {target}
                 </div>
+                <Link
+                  to="/qr/$id"
+                  params={{ id: loc.id }}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-3.5 py-2 text-sm font-semibold text-secondary-foreground print:hidden"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Open scan page
+                </Link>
               </div>
             );
           })}

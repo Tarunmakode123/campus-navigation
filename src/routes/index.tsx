@@ -19,16 +19,16 @@ import { clearEntryPoint, useEntryPoint } from "@/lib/entry-point";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Campus Guide - Smart Navigator" },
+      { title: "Home Navigation Pilot - Smart Navigator" },
       {
         name: "description",
         content:
-          "Scan a campus QR, choose your work, find the right person or department, and get walking directions.",
+          "Scan the Main Gate QR, choose a room or purpose, and get indoor walking directions.",
       },
-      { property: "og:title", content: "Campus Guide" },
+      { property: "og:title", content: "Home Navigation Pilot" },
       {
         property: "og:description",
-        content: "Purpose-based campus navigation for students, parents and visitors.",
+        content: "Purpose-based indoor navigation starting from the Main Gate QR.",
       },
     ],
   }),
@@ -36,12 +36,12 @@ export const Route = createFileRoute("/")({
 });
 
 const PURPOSES = [
-  { label: "Admission", hint: "Fees, documents, student records", icon: Building2 },
-  { label: "Meet professor", hint: "Faculty cabin and counselling", icon: UserRound },
-  { label: "Class", hint: "Classroom, orientation, timetable", icon: GraduationCap },
-  { label: "Lab practical", hint: "Computer lab and project work", icon: MessageSquareText },
-  { label: "Library", hint: "Books, card and reading room", icon: Search },
-  { label: "Hostel", hint: "Room allotment and permissions", icon: MapPin },
+  { label: "Rest", hint: "1st Bedroom or 2nd Bedroom", icon: Building2 },
+  { label: "Food", hint: "Dining Room and Kitchen", icon: UserRound },
+  { label: "Prayer", hint: "Bhagwan Room", icon: GraduationCap },
+  { label: "Freshen up", hint: "Bathroom route", icon: MessageSquareText },
+  { label: "Sitting area", hint: "Hall and Porch", icon: Search },
+  { label: "Kitchen access", hint: "Shortest route via Dining Room", icon: MapPin },
 ];
 
 function Home() {
@@ -85,14 +85,14 @@ function Home() {
             <div className="px-5 py-6 sm:px-7 sm:py-8">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
                 <QrCode className="h-3.5 w-3.5" />
-                QR scan based campus guide
+                Main Gate QR home pilot
               </div>
               <h1 className="mt-4 max-w-2xl text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
-                Tell the app your work. It tells you the person, place and route.
+                Choose a room. The app gives the shortest indoor route.
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-6 opacity-90 sm:text-base">
-                Built for a 35-acre campus flow: students, parents and visitors can search a
-                department, choose a task, meet the right person and start guided walking navigation.
+                This pilot uses your real home layout and metre distances from Main Gate to each
+                room. After testing here, the same model can scale to any campus.
               </p>
 
               <div className="mt-6 flex items-center gap-2 rounded-2xl bg-white p-2 shadow-card">
@@ -101,14 +101,32 @@ function Home() {
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search work, person, department or room"
+                  placeholder="Search room, work, purpose or area"
                   className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  to="/admin/qr"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-primary shadow-card transition-transform active:scale-[0.98]"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Main Gate QR
+                </Link>
+                <Link
+                  to="/qr/$id"
+                  params={{ id: "main-gate" }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-3.5 py-2 text-sm font-semibold text-primary-foreground backdrop-blur transition-colors hover:bg-white/15"
+                >
+                  <Navigation className="h-4 w-4" />
+                  Test scan flow
+                </Link>
               </div>
             </div>
           </div>
 
-          <CampusMap locations={locations} />
+          <HomeMap locations={locations} />
         </section>
 
         {entry && (
@@ -135,9 +153,9 @@ function Home() {
         <section className="mt-6">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold tracking-tight">What work do you have?</h2>
+              <h2 className="text-lg font-bold tracking-tight">Where do you want to go?</h2>
               <p className="text-sm text-muted-foreground">
-                Choose a purpose, then pick the matching destination.
+                Choose a purpose, then pick the matching room.
               </p>
             </div>
             {purpose !== "All" && (
@@ -210,16 +228,16 @@ function Home() {
 
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              {query || purpose !== "All" ? "Matching places" : "Campus directory"}
+              {query || purpose !== "All" ? "Matching rooms" : "Home directory"}
             </h2>
-            <span className="text-xs text-muted-foreground">{results.length} places</span>
+            <span className="text-xs text-muted-foreground">{results.length} points</span>
           </div>
 
           {results.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
               <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">
-                No place matches this search. Try a person, department or task.
+                No room matches this search. Try a purpose, area or room name.
               </p>
             </div>
           ) : (
@@ -274,7 +292,7 @@ function LocationCard({ loc }: { loc: Location }) {
   );
 }
 
-function CampusMap({ locations }: { locations: Location[] }) {
+function HomeMap({ locations }: { locations: Location[] }) {
   const plotted = locations.filter((l) => l.mapX != null && l.mapY != null);
 
   return (
@@ -282,7 +300,7 @@ function CampusMap({ locations }: { locations: Location[] }) {
       <div className="absolute inset-0 bg-[linear-gradient(90deg,oklch(0.94_0.012_240)_1px,transparent_1px),linear-gradient(0deg,oklch(0.94_0.012_240)_1px,transparent_1px)] bg-[size:32px_32px]" />
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
         <path
-          d="M10 84 C28 76, 30 56, 39 52 S53 40, 62 36 S69 30, 70 22"
+          d="M34 93 L38 61 L73 61 L77 58 L72 34 L72 15"
           fill="none"
           stroke="var(--color-primary)"
           strokeWidth="1.8"
@@ -290,23 +308,27 @@ function CampusMap({ locations }: { locations: Location[] }) {
           strokeDasharray="3 3"
         />
         <path
-          d="M39 52 C48 62, 48 72, 54 72 S72 74, 84 78"
+          d="M38 61 L73 86 M38 61 L27 38 M38 61 L36 27 L31 15"
           fill="none"
           stroke="var(--color-accent)"
           strokeWidth="1.4"
           strokeLinecap="round"
           strokeDasharray="3 3"
         />
-        <rect x="27" y="18" width="18" height="18" rx="3" fill="oklch(0.91 0.02 240)" />
-        <rect x="55" y="26" width="18" height="18" rx="3" fill="oklch(0.91 0.02 240)" />
-        <rect x="69" y="49" width="18" height="18" rx="3" fill="oklch(0.91 0.02 240)" />
-        <rect x="46" y="65" width="18" height="16" rx="3" fill="oklch(0.91 0.02 240)" />
+        <rect x="12" y="47" width="56" height="24" rx="2" fill="oklch(0.91 0.02 240 / 0.7)" />
+        <rect x="58" y="72" width="32" height="18" rx="2" fill="oklch(0.91 0.02 240 / 0.7)" />
+        <rect x="60" y="47" width="30" height="17" rx="2" fill="oklch(0.88 0.035 150 / 0.7)" />
+        <rect x="58" y="25" width="32" height="21" rx="2" fill="oklch(0.89 0.04 85 / 0.7)" />
+        <rect x="58" y="7" width="32" height="14" rx="2" fill="oklch(0.92 0.035 70 / 0.7)" />
+        <rect x="12" y="20" width="42" height="16" rx="2" fill="oklch(0.9 0.035 260 / 0.7)" />
+        <rect x="12" y="7" width="42" height="12" rx="2" fill="oklch(0.92 0.035 120 / 0.7)" />
+        <rect x="12" y="36" width="24" height="10" rx="2" fill="oklch(0.92 0.035 210 / 0.7)" />
       </svg>
       <div className="absolute left-4 top-4">
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Live campus map
+          Home pilot map
         </p>
-        <h2 className="text-xl font-bold tracking-tight">35 acre navigation</h2>
+        <h2 className="text-xl font-bold tracking-tight">Main Gate to rooms</h2>
       </div>
       {plotted.map((loc) => (
         <Link
@@ -323,7 +345,7 @@ function CampusMap({ locations }: { locations: Location[] }) {
       <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 rounded-2xl bg-white/90 p-3 text-xs shadow-card backdrop-blur">
         <div>
           <div className="font-semibold text-foreground">Scan, choose work, follow route</div>
-          <div className="text-muted-foreground">AR-style route guidance is on each destination.</div>
+          <div className="text-muted-foreground">Routes use your measured distances.</div>
         </div>
         <Navigation className="h-5 w-5 shrink-0 text-primary" />
       </div>

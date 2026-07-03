@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -15,6 +15,12 @@ import {
 import { AppHeader } from "@/components/AppHeader";
 import { useLocations } from "@/lib/locations";
 import { useEntryPoint } from "@/lib/entry-point";
+import {
+  buildRouteSteps,
+  calculateHomeRoute,
+  DEFAULT_ENTRY_ID,
+  formatMetres,
+} from "@/lib/home-navigation";
 
 export const Route = createFileRoute("/navigate/$id")({
   head: () => ({
@@ -31,19 +37,6 @@ export const Route = createFileRoute("/navigate/$id")({
   ),
 });
 
-function distance(a: [number, number], b: [number, number]) {
-  const earthRadius = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b[0] - a[0]);
-  const dLng = toRad(b[1] - a[1]);
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-  return 2 * earthRadius * Math.asin(Math.sqrt(x));
-}
-
 function NavigatePage() {
   const { id } = Route.useParams();
   const all = useLocations();
@@ -52,34 +45,24 @@ function NavigatePage() {
 
   const entryId = useEntryPoint();
   const entry =
-    all.find((l) => l.id === entryId) ?? all.find((l) => l.id === "main-gate") ?? all[0];
-  const [pos, setPos] = useState<[number, number] | null>(
-    entry?.latitude != null && entry?.longitude != null
-      ? [entry.latitude, entry.longitude]
-      : null,
-  );
+    all.find((l) => l.id === entryId) ?? all.find((l) => l.id === DEFAULT_ENTRY_ID) ?? all[0];
   const [started, setStarted] = useState(false);
   const [voice, setVoice] = useState(true);
   const [stepIndex, setStepIndex] = useState(0);
 
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (p) => setPos([p.coords.latitude, p.coords.longitude]),
-      () => {},
-      { enableHighAccuracy: true, timeout: 5000 },
-    );
-  }, []);
-
-  const meters = useMemo(() => {
-    if (!pos || dest.latitude == null || dest.longitude == null) return null;
-    return Math.max(25, Math.round(distance(pos, [dest.latitude, dest.longitude])));
-  }, [pos, dest]);
-
-  const minutes = meters ? Math.max(1, Math.round(meters / 80)) : null;
-  const steps = dest.steps?.length
-    ? dest.steps
-    : ["Start from campus entry", "Follow the highlighted path", `Arrive at ${dest.name}`];
+  const route = useMemo(
+    () => calculateHomeRoute(entry?.id ?? DEFAULT_ENTRY_ID, dest.id),
+    [entry?.id, dest.id],
+  );
+  const routeLocations = useMemo(
+    () =>
+      route.nodes
+        .map((nodeId) => all.find((loc) => loc.id === nodeId))
+        .filter(Boolean) as typeof all,
+    [all, route.nodes],
+  );
+  const steps = buildRouteSteps(route, all);
+  const minutes = Math.max(1, Math.ceil(route.totalMetres / 60));
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
   const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
 
@@ -110,7 +93,7 @@ function NavigatePage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_0,rgba(2,6,23,0.2)_34%,rgba(2,6,23,0.88)_78%)]" />
             <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
               <div className="rounded-full bg-black/35 px-3 py-1 text-xs font-medium backdrop-blur">
-                AR route preview
+                Indoor route preview
               </div>
               <button
                 onClick={() => setVoice((v) => !v)}
@@ -140,7 +123,7 @@ function NavigatePage() {
                     </div>
                     <h1 className="mt-1 truncate text-xl font-bold tracking-tight">{dest.name}</h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      From {entry?.name ?? "current position"}
+                      From {entry?.name ?? "Main Gate"} by QR route graph
                     </p>
                   </div>
                   <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
@@ -163,12 +146,12 @@ function NavigatePage() {
             <Stat
               icon={<Ruler className="h-4 w-4" />}
               label="Distance"
-              value={meters ? `${meters} m` : "Demo route"}
+              value={formatMetres(route.totalMetres)}
             />
             <Stat
               icon={<Footprints className="h-4 w-4" />}
               label="Walking"
-              value={minutes ? `${minutes} min` : "3 min"}
+              value={`${minutes} min`}
             />
           </div>
 
@@ -206,6 +189,11 @@ function NavigatePage() {
           <MiniMap
             from={{ x: entry?.mapX ?? 10, y: entry?.mapY ?? 84, label: entry?.name ?? "Entry" }}
             to={{ x: dest.mapX ?? 70, y: dest.mapY ?? 30, label: dest.name }}
+            route={routeLocations.map((loc) => ({
+              x: loc.mapX ?? 50,
+              y: loc.mapY ?? 50,
+              label: loc.name,
+            }))}
           />
 
           <button
@@ -238,23 +226,40 @@ function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: s
 function MiniMap({
   from,
   to,
+  route,
 }: {
   from: { x: number; y: number; label: string };
   to: { x: number; y: number; label: string };
+  route: { x: number; y: number; label: string }[];
 }) {
+  const path = route.length
+    ? route.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
+    : `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
+
   return (
     <div className="relative h-52 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
       <div className="absolute inset-0 bg-[linear-gradient(90deg,oklch(0.94_0.012_240)_1px,transparent_1px),linear-gradient(0deg,oklch(0.94_0.012_240)_1px,transparent_1px)] bg-[size:28px_28px]" />
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
         <path
-          d={`M ${from.x} ${from.y} C 34 72, 42 52, 54 50 S 70 40, ${to.x} ${to.y}`}
+          d={path}
           fill="none"
           stroke="var(--color-primary)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray="4 3"
         />
+        <rect x="12" y="47" width="56" height="24" rx="2" fill="oklch(0.91 0.02 240 / 0.55)" />
+        <rect x="58" y="72" width="32" height="18" rx="2" fill="oklch(0.91 0.02 240 / 0.55)" />
+        <rect x="60" y="47" width="30" height="17" rx="2" fill="oklch(0.88 0.035 150 / 0.55)" />
+        <rect x="58" y="25" width="32" height="21" rx="2" fill="oklch(0.89 0.04 85 / 0.55)" />
+        <rect x="58" y="7" width="32" height="14" rx="2" fill="oklch(0.92 0.035 70 / 0.55)" />
+        <rect x="12" y="20" width="42" height="16" rx="2" fill="oklch(0.9 0.035 260 / 0.55)" />
+        <rect x="12" y="7" width="42" height="12" rx="2" fill="oklch(0.92 0.035 120 / 0.55)" />
+        <rect x="12" y="36" width="24" height="10" rx="2" fill="oklch(0.92 0.035 210 / 0.55)" />
       </svg>
+      {route.slice(1, -1).map((point) => (
+        <Pin key={point.label} x={point.x} y={point.y} label={point.label} tone="accent" />
+      ))}
       <Pin x={from.x} y={from.y} label={from.label} tone="accent" />
       <Pin x={to.x} y={to.y} label={to.label} tone="primary" />
     </div>

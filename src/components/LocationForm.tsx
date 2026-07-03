@@ -11,7 +11,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
       id: "",
       name: "",
       description: "",
-      category: "Academic",
+      category: "Other",
       purpose: "",
       person: "",
       department: "",
@@ -48,7 +48,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
           value={f.name}
           onChange={(e) => set("name", e.target.value)}
           className={inputCls}
-          placeholder="e.g. Central Library"
+          placeholder="e.g. Hall"
         />
       </Field>
 
@@ -67,7 +67,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
             value={f.purpose ?? ""}
             onChange={(e) => set("purpose", e.target.value)}
             className={inputCls}
-            placeholder="Admission, fees, meet professor..."
+            placeholder="Rest, food, prayer, freshen up..."
           />
         </Field>
         <Field label="Person to meet">
@@ -75,7 +75,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
             value={f.person ?? ""}
             onChange={(e) => set("person", e.target.value)}
             className={inputCls}
-            placeholder="Dr. Sharma, Admin officer..."
+            placeholder="Bedroom, kitchen, prayer room..."
           />
         </Field>
         <Field label="Department">
@@ -83,7 +83,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
             value={f.department ?? ""}
             onChange={(e) => set("department", e.target.value)}
             className={inputCls}
-            placeholder="Information Technology"
+            placeholder="Home Core"
           />
         </Field>
         <Field label="Route hint">
@@ -91,7 +91,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
             value={f.routeHint ?? ""}
             onChange={(e) => set("routeHint", e.target.value)}
             className={inputCls}
-            placeholder="Turn right after Block A..."
+            placeholder="Move from Hall to Dining Room..."
           />
         </Field>
       </div>
@@ -109,7 +109,7 @@ export function LocationForm({ initial }: { initial?: Location }) {
             )
           }
           className={`${inputCls} min-h-[96px] resize-y`}
-          placeholder={"One step per line\nStart at Main Gate\nTurn right at Block A"}
+          placeholder={"One step per line\nStart at Main Gate\nMove to Hall"}
         />
       </Field>
 
